@@ -9,10 +9,18 @@
     <script src="knockout-3.5.1.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.colVis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
     <link  rel="stylesheet" type=text/css href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.1/knockout-latest.js" type="text/javascript"></script>
@@ -20,30 +28,57 @@
 
     <script>
         $(document).ready(function () {
-            $('#example').DataTable({
+            var table = $('#example').DataTable({
+                stateSave: true,
+                buttons: [
+                {
+                    extend: 'csvHtml5',
+                    text: '<i class="fas fa-file-export"></i>'
+                }
+                ],
                 language: {
                     search: "_INPUT_",
                     searchPlaceholder: "Search..."
                 },
-                dom: '<"top"f<"clear">>rt<"bottom"ilp<"clear">>',
+                dom: 'Bfrtlip',
                  "columns": [
-                { "data": 'status_indicator', "width": "5%" },
-                { "data": 'kind', "width": "5%" },
-                { "data": 'name', "width": "5%" },
-                { "data": 'theatre', "width": "3%" },
-                { "data": 'datetime', "width": "5%" },
-                { "data": 'status', "width": "5%" },
-                { "data": 'message', "width": "20%" },
-                { "data": 'action', "width": "5%" }
+                { "data": 'status_indicator', "width": "6%" },
+                { "data": 'kind', "width": "2%" },
+                { "data": 'name', "width": "7%" },
+                { "data": 'theatre', "width": "6%" },
+                { "data": 'datetime', "width": "10%" },
+                { "data": 'status', "width": "9%" },
+                { "data": 'message', "width": "28%" },
+                { "data": 'action', "width": "4%" }
             ]});
+
+            $('input.toggle-vis').on('click', function (e) {
+
+                // Get the column API object
+                var column = table.column($(this).attr('data-column'));
+
+                // Toggle the visibility
+                column.visible(!column.visible());
+            });
+            $("button.reset").click(function(){
+                $("input.toggle-vis").prop("checked", true);
+                table.column( 0 ).visible( true );
+                table.column( 1 ).visible( true );
+                table.column( 2 ).visible( true );
+                table.column( 3 ).visible( true );
+                table.column( 4 ).visible( true );
+                table.column( 5 ).visible( true );
+                table.column( 6 ).visible( true );
+                table.column( 7 ).visible( true );
+
+            });
         });
-
-
     </script>
 
     <style>
         body {
             background: #1C2135;
+
         }
 
         .table {
@@ -51,6 +86,23 @@
             margin-left: 10px;
             width: 98%;
             font-size: 12px;
+        }
+
+        div.dt-buttons {
+            position: relative;
+            margin-left: 10px;
+
+        }
+
+        button.dt-button.buttons-csv.buttons-html5 {
+            position: relative;
+            top: 40px;
+            width: 40px;
+            height: 40px;
+            color: #F7F9FF;
+            background: #007BFF;
+            border-radius: 5px;
+            border: none;
         }
 
         .table-striped>tbody>tr:nth-child(odd)>td,
@@ -79,57 +131,23 @@
             color: #28A745;
         }
 
-        .top_left_corner_option {
+        /****************************************************/
 
-        }
-
-        .delete_icon, .export_icon {
-            position: relative;
-            margin: 4px;
-            top: 47px;
-            left: 6px;
-            padding-top: 10px;
-            padding-bottom: 30px;
-            text-align: center;
-            width: 40px;
-            height: 30px;
-            font-size: 14px;
-            display: inline-block;
-            cursor: pointer;
-            color: #F7F9FF;
-            background: #007BFF;
-            border-radius: 5px;
-        }
-
-        .slider_icon {
-            position: relative;
-            top: 47px;
-            right: 16px;
-            float: right;
-            padding-top: 10px;
-            padding-bottom: 30px;
-            text-align: center;
-            width: 40px;
-            height: 30px;
-            font-size: 14px;
-            display: inline-block;
-            cursor: pointer;
-            color: #F7F9FF;
-            background: #007BFF;
-            border-radius: 5px;
-        }
-
+         /** Page Pagination* */
         div.dataTables_wrapper div.dataTables_paginate {
             position: relative;
-            bottom: 50px;
+            bottom: 20px;
+            padding-right: 20px;
         }
 
+        /****************************************************/
+
+        /** Search Field **/
         div.dataTables_wrapper div.dataTables_filter input {
-            width: 300px;
+            width: 330px;
             height: 40px;
             border: none;
-            margin-right: 62px;
-            margin-bottom: 5px;
+            margin-right: 64px;
         }
 
         input[type="search"] {
@@ -137,41 +155,162 @@
             font-style: italic;
         }
 
+        /****************************************************/
+
+        /** Column Previous **/
         .page-item.disabled .page-link {
             color: #6c757d;
             background: #22273C;
             border: 1px solid #6c757d;
         }
 
+         /** Column 1,2,3... **/
         .page-link{
             background: #282E43;
             border: 1px solid #6c757d;
             color: #6c757d;
         }
 
+        /** Show entries Label **/
         .dataTables_info, .dataTables_length{
+            color: white;
+            padding-left: 15px;
+        }
+
+        /** Show entries Select **/
+        .form-select-sm{
+            background: #22273C;
             color: white;
         }
 
-        .form-select-sm {
-            background: #22273C;
+        button#dropdownMenuButton.btn.btn-secondary.dropdown-toggle {
+            position: relative;
+            float: right;
+            right: 18px;
+            top: 40px;
+            z-index: 99;
+            background: #007BFF;
+            border: none;
+        }
+
+        button#dropdownMenuButton.btn.btn-secondary.dropdown-toggle::after {
+            content: none;
+        }
+
+        div.dropdown-menu.show {
+            transform: translate3d(1244px, 76px, 0px) !important;
+            width: 260px;
+            background: #4C5569;
+            background-repeat: no-repeat;
+            font-size: 13px;
+
+        }
+
+        div.title {
+            margin: 5px 0 0 20px;
             color: white;
+        }
+
+        div.checkbox_column{
+            position: relative;
+            width: 220px;
+            display: block;
+            margin: 15px 0 0 20px;
+            z-index: 2;
+
+        }
+        a.dropdown-item {
+            color: white;
+            z-index: 2;
+        }
+        a.dropdown-item:hover {
+            background: none;
+        }
+
+        button.reset {
+            position: relative;
+            right: 6px;
+            text-decoration: none;
+            color: lightblue;
+            font-size: 13px;
+            margin: 5px 0 0 157px;
+            border: none;
+            outline: none;
+            background: none;
         }
 
     </style>
 </head>
 
 <body>
-    <div class="top_left_corner_option">
-        <span class="delete_icon"><i class="fa-solid fa-trash-can"></i></span>
-        <span class="export_icon"><i class="fa-solid fa-file-export"></i></span>
-        <span class="slider_icon"><i class="fa-solid fa-sliders"></i></span>
+
+    <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="fa-solid fa-sliders"></i>
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <div class="title">Column:</div>
+            <div class="checkbox_column">
+                <a class="dropdown-item" href="#">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" data-column="0" class="toggle-vis custom-control-input" id="checkbox0" checked>
+                        <label class="custom-control-label" for="checkbox0">Status Indicator</label>
+                    </div>
+                </a>
+                <a class="dropdown-item" href="#">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" data-column="1" class="toggle-vis custom-control-input" id="checkbox1" checked>
+                        <label class="custom-control-label" for="checkbox1">Kind</label>
+                    </div>
+                </a>
+                <a class="dropdown-item" href="#">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" data-column="2" class="toggle-vis custom-control-input" id="checkbox2" checked disabled>
+                        <label class="custom-control-label" for="checkbox2">Name</label>
+                    </div>
+                </a>
+                <a class="dropdown-item" href="#">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" data-column="3" class="toggle-vis custom-control-input" id="checkbox3" checked>
+                        <label class="custom-control-label" for="checkbox3">Theatre</label>
+                    </div>
+                </a>
+                <a class="dropdown-item" href="#">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" data-column="4" class="toggle-vis custom-control-input" id="checkbox4" checked>
+                        <label class="custom-control-label" for="checkbox4">Issue Date</label>
+                    </div>
+                </a>
+                <a class="dropdown-item" href="#">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" data-column="5" class="toggle-vis custom-control-input" id="checkbox5" checked>
+                        <label class="custom-control-label" for="checkbox5">Status</label>
+                    </div>
+                </a>
+                <a class="dropdown-item" href="#">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" data-column="6" class="toggle-vis custom-control-input" id="checkbox6" checked>
+                        <label class="custom-control-label" for="checkbox6">Exception Message</label>
+                    </div>
+                </a>
+                <a class="dropdown-item" href="#">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" data-column="7" class="toggle-vis custom-control-input" id="checkbox7" checked>
+                        <label class="custom-control-label" for="checkbox7">Action</label>
+                    </div>
+                </a>
+            </div>
+            <div><button class="reset">Reset Defaults</button></div>
+        </div>
     </div>
+
+
+
 
     <table id="example" class="table table-striped">
         <thead>
             <tr>
-                <th></th>
+                <th style="color: #101529; font-size: 2px;">Status Indicator</th>
                 <th>Kind</th>
                 <th>Name</th>
                 <th>Theatre</th>
@@ -191,13 +330,54 @@
             <!--ko ifnot: progress == 0-->
                 <td class="status_icon"><i class="fa-solid fa-circle-check"></i></td>
             <!--/ko-->
-                <td data-bind="text: type"></td>
+            <!--ko if: type == 1026-->
+                <td>KDM</td>
+            <!--/ko-->
+            <!--ko if: type == 1027-->
+                <td>DCP</td>
+            <!--/ko-->
+            <!--ko if: type == 1028-->
+                <td>SPL</td>
+            <!--/ko-->
+            <!--ko if: type == 1029-->
+                <td>PACK</td>
+            <!--/ko-->
+            <!--ko if: type == 1030-->
+                <td>RAR</td>
+            <!--/ko-->
                 <td data-bind="text: annotation"></td>
                 <td data-bind="text: theatre"></td>
                 <td data-bind="text: datetime"></td>
-                <td data-bind="text: status"></td>
+            <!--ko if: status == -1-->
+                <td>PENDING</td>
+            <!--/ko-->
+            <!--ko if: status == 0-->
+                <td>QUEUED</td>
+            <!--/ko-->
+            <!--ko if: status == 1-->
+                <td>IN_PROGRESS</td>
+            <!--/ko-->
+            <!--ko if: status == 2-->
+                <td>IN_PROGRESS_POST</td>
+            <!--/ko-->
+            <!--ko if: status == 3-->
+                <td>PAUSED</td>
+            <!--/ko-->
+            <!--ko if: status == 4-->
+                <td>FINISHED</td>
+            <!--/ko-->
+            <!--ko if: status == 5-->
+                <td>CANCELED</td>
+            <!--/ko-->
+            <!--ko if: status == 6-->
+                <td>EXCEPTION</td>
+            <!--/ko-->
+            <!--ko ifnot: status == -1 || status == 0 || status == 1
+            || status == 2 || status == 3 || status == 4 || status == 5 || status == 6-->
+                <td>ERROR</td>
+            <!--/ko-->
                 <td data-bind="text: messages"></td>
-                <td class="status_icon"><i class="fa-solid fa-trash-can"></i></td>
+                <td><i class="fa-solid fa-trash-can"></td>
             </tr>
           <!--/ko-->
         </tbody>
@@ -213,6 +393,8 @@
                 self.data(retrievedData);
                 console.log(self.data());
          });
+
+
     }
 
     ko.applyBindings(new AppViewModel());
