@@ -3,12 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
     <title>Data Table Assignment</title>
-    <script src="jquery-3.6.0.min.js"></script>
-    <script src="knockout-3.5.1.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-    <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.colVis.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
@@ -16,9 +13,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.2/moment.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/colvis/1.1.2/css/dataTables.colVis.css">
     <link  rel="stylesheet" type=text/css href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css">
+    <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.colVis.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -30,35 +32,79 @@
         $(document).ready(function () {
             var table = $('#example').DataTable({
                 stateSave: true,
+                "processing" : true,
+                lengthMenu: [
+                    [50, 100, 250, -1],
+                    [50, 100, 250, 'All'],
+                ],
                 buttons: [
                 {
+                    extend: 'colvis',
+                    text:   '<i class="fa-solid fa-sliders"></i>',
+                    postfixButtons: [
+                        {
+                            text: 'Reset Default',
+                            action: function ( e, dt, node, config ) {
+                                table.column( 0 ).visible( true );
+                                table.column( 1 ).visible( true );
+                                table.column( 2 ).visible( true );
+                                table.column( 3 ).visible( true );
+                                table.column( 4 ).visible( true );
+                                table.column( 5 ).visible( true );
+                                table.column( 6 ).visible( true );
+                                table.column( 7 ).visible( true );
+                        }
+                        }
+                    ],
+                    buttons : [{
+                        extend: 'columnsToggle'
+                    }],
+                },
+                {
                     extend: 'csvHtml5',
-                    text: '<i class="fas fa-file-export"></i>'
+                    text: '<i class="fas fa-file-export"></i>',
+                    exportOptions: {
+                        columns: ':visible'
+                    }
                 }
                 ],
                 language: {
                     search: "_INPUT_",
                     searchPlaceholder: "Search..."
                 },
-                dom: 'Bfrtlip',
+
+                dom: '<"toolbar">Bfrtlip',
                  "columns": [
-                { "data": 'status_indicator', "width": "6%" },
+                { "data": 'status_indicator', "width": "6%"},
                 { "data": 'kind', "width": "2%" },
                 { "data": 'name', "width": "7%" },
                 { "data": 'theatre', "width": "6%" },
-                { "data": 'datetime', "width": "10%" },
+                { "data": 'datetime', "width": "10%",
+                render: function (data, type, row, meta) {
+                    return moment.utc(data).local().format('YYYY-MM-DDTHH:mm:ss');
+                } },
                 { "data": 'status', "width": "9%" },
                 { "data": 'message', "width": "28%" },
                 { "data": 'action', "width": "4%" }
             ]});
 
-            $('input.toggle-vis').on('click', function (e) {
+            $('div.toolbar').html('<a class="nav-link dropdown-toggle " href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-trash-can"></i></a>\
+							<ul class="dropdown-menu">\
+							<li><a class="dropdown-item" href="#">Clear All Task</a></li>\
+							<li><a class="dropdown-item" href="#">Clear Finished Task</a></li>\
+							<li><a class="dropdown-item" href="#">Clear Exception Task</a></li>\
+							<li><a class="dropdown-item" href="#">Clear Queued Task</a></li>\
+							<li><a class="dropdown-item" href="#">Clear Pending Task</a></li>\
+							</ul>');
 
+            $('input.toggle-vis').on('click', function (e) {
+                e.stopPropagation;
                 // Get the column API object
                 var column = table.column($(this).attr('data-column'));
 
                 // Toggle the visibility
                 column.visible(!column.visible());
+
             });
             $("button.reset").click(function(){
                 $("input.toggle-vis").prop("checked", true);
@@ -70,34 +116,187 @@
                 table.column( 5 ).visible( true );
                 table.column( 6 ).visible( true );
                 table.column( 7 ).visible( true );
-
             });
+
         });
     </script>
 
     <style>
         body {
             background: #1C2135;
+        }
+
+        a.nav-link.dropdown-toggle {
+            position: absolute;
+            top: 20px;
+            left: 12px;
+            width: 44px;
+            height: 40px;
+            color: #F7F9FF;
+            background: #007BFF;
+            border-radius: 5px;
+            border: none;
+            padding-bottom: 30px;
+            text-align: center;
+            font-size: 14px;
+            z-index: 100;
+        }
+        a.nav-link.dropdown-toggle:after {
+            display: none;
+        }
+
+        .dropdown-menu {
+            background: #262E43;
+        }
+
+        a.dropdown-item {
+            color: white;
+            z-index: 2;
+        }
+
+        a.dropdown-item:hover {
+            color: white;
+            background: none;
+        }
+
+        button.dt-button.buttons-columnVisibility:before,
+        button.dt-button.buttons-columnVisibility.active span:before {
+            display:block;
+            position:absolute;
+            top:1.2em;
+            left:0;
+            width:14px;
+            height:14px;
+            box-sizing:border-box;
+        }
+
+        div.dt-button-collection button.dt-button {
+            color: white;
+        }
+
+        div.dt-button-collection button.dt-button.active:not(.disabled){
+            background: #262E43;
+            color: white;
+        }
+
+        div.dt-button-collection button.dt-button.active:not(.disabled):hover {
+            background: none;
+        }
+
+        div.dt-button-collection button.dt-button:last-child {
+            position: relative;
+            color: white;
+            border: none;
+            outline: none;
+            background: none;
+            text-align: right;
+            text-decoration: underline;
+        }
+
+        button.dt-button.buttons-columnVisibility:before {
+            content:' ';
+            margin-top:-6px;
+            margin-left:10px;
+            border:1px solid white;
+            border-radius:3px;
+            background-color: #262E43;
+        }
+
+        button.dt-button.buttons-columnVisibility.active span:before {
+            content:'\2713';
+            margin-top:-11px;
+            margin-left:10px;
+            text-align:center;
 
         }
 
-        .table {
+       button.dt-button.buttons-columnVisibility span {
+            margin-left:20px;
+        }
+
+
+
+        table#example.table.table-striped.dataTable.no-footer {
             position: relative;
+            padding-top: 25px;
             margin-left: 10px;
             width: 98%;
             font-size: 12px;
         }
 
         div.dt-buttons {
-            position: relative;
+            position: absolute;
+            margin-top: 20px;
             margin-left: 10px;
+            width: 98%;
+        }
 
+        button.dt-button.buttons-collection{
+            position: relative;
+            width: 44px;
+            height: 40px;
+            color: #F7F9FF;
+            background: #007BFF;
+            border-radius: 5px;
+            border: none;
+        }
+
+        div.dt-button-collection.dtb-b3 {
+            position: absolute;
+            top: 35px !important;
+            left: 0 !important;
+            width: 200px;
+            margin-top: 3px;
+            margin-bottom: 3px;
+            padding: 4px 4px 2px 4px;
+            border: 1px solid #ccc;
+            border: 1px solid rgba(0, 0, 0, 0.4);
+            background-color: #262E43;
+            overflow: hidden;
+            z-index: 2002;
+            border-radius: 5px;
+            box-shadow: 3px 4px 10px 1px rgb(0 0 0 / 30%);
+            box-sizing: border-box;
+        }
+
+        div.dt-button-collection {
+            position: absolute;
+            top: 40px;
+            left: 1300px !important;
+            width: 200px;
+            margin-top: 3px;
+            margin-bottom: 3px;
+            padding: 4px 4px 2px 4px;
+            border: 1px solid #ccc;
+            border: 1px solid rgba(0, 0, 0, 0.4);
+            background-color: #262E43;
+            overflow: hidden;
+            z-index: 2002;
+            border-radius: 5px;
+            box-shadow: 3px 4px 10px 1pxrgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
+        }
+
+        button.dt-button.buttons-collection.buttons-colvis {
+            position: relative;
+            float: right;
+            width: 44px;
+            height: 40px;
+            color: #F7F9FF;
+            background: #007BFF;
+            border-radius: 5px;
+            border: none;
+            z-index: 100;
+        }
+
+        span.dt-down-arrow {
+            display: none;
         }
 
         button.dt-button.buttons-csv.buttons-html5 {
             position: relative;
-            top: 40px;
-            width: 40px;
+            left: 50px;
+            width: 44px;
             height: 40px;
             color: #F7F9FF;
             background: #007BFF;
@@ -118,6 +317,10 @@
            color: white;
            border: none;
         }
+
+        /****************************************************/
+
+        /** Status Indicator Icon **/
 
         .status_icon {
             text-align: center;
@@ -144,10 +347,13 @@
 
         /** Search Field **/
         div.dataTables_wrapper div.dataTables_filter input {
+            position: relative;
             width: 330px;
             height: 40px;
             border: none;
-            margin-right: 64px;
+            top: 20px;
+            margin-right: 80px;
+            background-color: #282E43 !important;
         }
 
         input[type="search"] {
@@ -158,6 +364,12 @@
         /****************************************************/
 
         /** Column Previous **/
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 0;
+            margin-left: 0;
+            border: none;
+        }
+
         .page-item.disabled .page-link {
             color: #6c757d;
             background: #22273C;
@@ -173,27 +385,29 @@
 
         /** Show entries Label **/
         .dataTables_info, .dataTables_length{
-            color: white;
+            color: white !important;
             padding-left: 15px;
         }
 
         /** Show entries Select **/
-        .form-select-sm{
-            background: #22273C;
+        select.form-select.form-select-sm{
+            width: 100px !important;
+            background: #22273C !important;
             color: white;
         }
 
-        button#dropdownMenuButton.btn.btn-secondary.dropdown-toggle {
+
+        button#CheckboxdropdownMenuButton.btn.btn-secondary.dropdown-toggle {
             position: relative;
             float: right;
-            right: 18px;
+            right: 20px;
             top: 40px;
             z-index: 99;
             background: #007BFF;
             border: none;
         }
 
-        button#dropdownMenuButton.btn.btn-secondary.dropdown-toggle::after {
+        button#CheckboxdropdownMenuButton.btn.btn-secondary.dropdown-toggle::after {
             content: none;
         }
 
@@ -219,13 +433,7 @@
             z-index: 2;
 
         }
-        a.dropdown-item {
-            color: white;
-            z-index: 2;
-        }
-        a.dropdown-item:hover {
-            background: none;
-        }
+
 
         button.reset {
             position: relative;
@@ -239,70 +447,77 @@
             background: none;
         }
 
+
+
+        .page-link:hover {
+            background: none;
+            border: none;
+        }
+
     </style>
 </head>
 
 <body>
 
-    <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <i class="fa-solid fa-sliders"></i>
-        </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <div class="title">Column:</div>
-            <div class="checkbox_column">
-                <a class="dropdown-item" href="#">
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox" data-column="0" class="toggle-vis custom-control-input" id="checkbox0" checked>
-                        <label class="custom-control-label" for="checkbox0">Status Indicator</label>
-                    </div>
-                </a>
-                <a class="dropdown-item" href="#">
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox" data-column="1" class="toggle-vis custom-control-input" id="checkbox1" checked>
-                        <label class="custom-control-label" for="checkbox1">Kind</label>
-                    </div>
-                </a>
-                <a class="dropdown-item" href="#">
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox" data-column="2" class="toggle-vis custom-control-input" id="checkbox2" checked disabled>
-                        <label class="custom-control-label" for="checkbox2">Name</label>
-                    </div>
-                </a>
-                <a class="dropdown-item" href="#">
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox" data-column="3" class="toggle-vis custom-control-input" id="checkbox3" checked>
-                        <label class="custom-control-label" for="checkbox3">Theatre</label>
-                    </div>
-                </a>
-                <a class="dropdown-item" href="#">
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox" data-column="4" class="toggle-vis custom-control-input" id="checkbox4" checked>
-                        <label class="custom-control-label" for="checkbox4">Issue Date</label>
-                    </div>
-                </a>
-                <a class="dropdown-item" href="#">
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox" data-column="5" class="toggle-vis custom-control-input" id="checkbox5" checked>
-                        <label class="custom-control-label" for="checkbox5">Status</label>
-                    </div>
-                </a>
-                <a class="dropdown-item" href="#">
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox" data-column="6" class="toggle-vis custom-control-input" id="checkbox6" checked>
-                        <label class="custom-control-label" for="checkbox6">Exception Message</label>
-                    </div>
-                </a>
-                <a class="dropdown-item" href="#">
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox" data-column="7" class="toggle-vis custom-control-input" id="checkbox7" checked>
-                        <label class="custom-control-label" for="checkbox7">Action</label>
-                    </div>
-                </a>
-            </div>
-            <div><button class="reset">Reset Defaults</button></div>
-        </div>
-    </div>
+<!--    <div class="dropdown">-->
+<!--        <button class="btn btn-secondary dropdown-toggle" type="button" id="CheckboxdropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
+<!--        <i class="fa-solid fa-sliders"></i>-->
+<!--        </button>-->
+<!--        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">-->
+<!--            <div class="title">Column:</div>-->
+<!--            <div class="checkbox_column">-->
+<!--                <a class="dropdown-item" href="#">-->
+<!--                    <div class="custom-control custom-checkbox">-->
+<!--                        <input type="checkbox" data-column="0" class="toggle-vis custom-control-input" id="checkbox0" checked>-->
+<!--                        <label class="custom-control-label" for="checkbox0">Status Indicator</label>-->
+<!--                    </div>-->
+<!--                </a>-->
+<!--                <a class="dropdown-item" href="#">-->
+<!--                    <div class="custom-control custom-checkbox">-->
+<!--                        <input type="checkbox" data-column="1" class="toggle-vis custom-control-input" id="checkbox1" checked>-->
+<!--                        <label class="custom-control-label" for="checkbox1">Kind</label>-->
+<!--                    </div>-->
+<!--                </a>-->
+<!--                <a class="dropdown-item" href="#">-->
+<!--                    <div class="custom-control custom-checkbox">-->
+<!--                        <input type="checkbox" data-column="2" class="toggle-vis custom-control-input" id="checkbox2" checked disabled>-->
+<!--                        <label class="custom-control-label" for="checkbox2">Name</label>-->
+<!--                    </div>-->
+<!--                </a>-->
+<!--                <a class="dropdown-item" href="#">-->
+<!--                    <div class="custom-control custom-checkbox">-->
+<!--                        <input type="checkbox" data-column="3" class="toggle-vis custom-control-input" id="checkbox3" checked>-->
+<!--                        <label class="custom-control-label" for="checkbox3">Theatre</label>-->
+<!--                    </div>-->
+<!--                </a>-->
+<!--                <a class="dropdown-item" href="#">-->
+<!--                    <div class="custom-control custom-checkbox">-->
+<!--                        <input type="checkbox" data-column="4" class="toggle-vis custom-control-input" id="checkbox4" checked>-->
+<!--                        <label class="custom-control-label" for="checkbox4">Issue Date</label>-->
+<!--                    </div>-->
+<!--                </a>-->
+<!--                <a class="dropdown-item" href="#">-->
+<!--                    <div class="custom-control custom-checkbox">-->
+<!--                        <input type="checkbox" data-column="5" class="toggle-vis custom-control-input" id="checkbox5" checked>-->
+<!--                        <label class="custom-control-label" for="checkbox5">Status</label>-->
+<!--                    </div>-->
+<!--                </a>-->
+<!--                <a class="dropdown-item" href="#">-->
+<!--                    <div class="custom-control custom-checkbox">-->
+<!--                        <input type="checkbox" data-column="6" class="toggle-vis custom-control-input" id="checkbox6" checked>-->
+<!--                        <label class="custom-control-label" for="checkbox6">Exception Message</label>-->
+<!--                    </div>-->
+<!--                </a>-->
+<!--                <a class="dropdown-item" href="#">-->
+<!--                    <div class="custom-control custom-checkbox">-->
+<!--                        <input type="checkbox" data-column="7" class="toggle-vis custom-control-input" id="checkbox7" checked>-->
+<!--                        <label class="custom-control-label" for="checkbox7">Action</label>-->
+<!--                    </div>-->
+<!--                </a>-->
+<!--            </div>-->
+<!--            <div><button class="reset">Reset Defaults</button></div>-->
+<!--        </div>-->
+<!--    </div>-->
 
 
 
@@ -377,7 +592,7 @@
                 <td>ERROR</td>
             <!--/ko-->
                 <td data-bind="text: messages"></td>
-                <td><i class="fa-solid fa-trash-can"></td>
+                <td><i class="fa-solid fa-trash-can"/></td>
             </tr>
           <!--/ko-->
         </tbody>
