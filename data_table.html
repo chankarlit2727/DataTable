@@ -30,6 +30,10 @@
         $(document).ready(function () {
             var table = $('#example').DataTable({
                 stateSave: true,
+                info: false,
+                stateLoadParams: function( settings, data ) {
+                    if (data.order) delete data.order;
+                  },
                 select: true,
                 autoWidth: false,
                 order: [],
@@ -330,6 +334,10 @@
 
        button.dt-button.buttons-columnVisibility span {
             margin-left:20px;
+        }
+
+        button.dt-button.buttons-columnVisibility.active:active {
+            background-color: none;
         }
 
        /****************************************************/
