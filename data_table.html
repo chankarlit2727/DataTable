@@ -15,7 +15,6 @@
     <script src="https://cdn.datatables.net/plug-ins/1.12.1/dataRender/ellipsis.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/colvis/1.1.2/css/dataTables.colVis.css">
     <link  rel="stylesheet" type=text/css href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css">
@@ -31,6 +30,13 @@
         $(document).ready(function () {
             var table = $('#example').DataTable({
                 stateSave: true,
+                select: true,
+                autoWidth: false,
+                order: [],
+                ajax: {
+                    url: 'data.json',
+                    dataSrc: 'objects'
+                },
                 buttons: [
                 {
                     extend: 'colvis',
@@ -68,23 +74,61 @@
                 },
 
                 dom: '<"toolbar">Bfrtlip',
-                 "columns": [
-                { "data": 'status_indicator', "width": "6%", "searchable": false},
-                { "data": 'kind', "width": "2%", "searchable": false},
-                { "data": 'name', "width": "7%" },
-                { "data": 'theatre', "width": "6%" },
-                { "data": 'datetime', "width": "10%", "searchable": false,
-                render: function (data, type, row, meta) {
-                    return moment.utc(data).local().format('YYYY-MM-DDTHH:mm:ss');
-                } },
-                { "data": 'status', "width": "9%" , "searchable": false},
-                { "data": 'message', "width": "28%", "searchable": false},
-                { "data": 'action', "width": "4%", "searchable": false }
-            ],
-                columnDefs: [ {
-                    targets: 6,
-                    render: $.fn.dataTable.render.ellipsis( 50, true )
-                }]
+                columns: [
+                    { data: 'progress', width: '6%', searchable: false, className: "status_icon",
+                     render: function (data, type, row) {
+                        if (row.progress === "0") {
+                            return '<i class="fa-solid fa-circle-xmark"></i>';}
+                        else {
+                            return '<i class="fa-solid fa-circle-check"></i>';
+                        }
+                    }
+                    },
+                    { data: 'type', width: '2%', searchable: false,
+                    render: function (data, type, row) {
+                        if (row.type == "1026") {
+                            return '<td>KDM</td>';}
+                        if (row.type == "1027") {
+                            return '<td>DCP</td>';}
+                        if (row.type == "1028") {
+                            return '<td>SPL</td>';}
+                        if (row.type == "1029") {
+                            return '<td>PACK</td>';}
+                        if (row.type == "1030") {
+                            return '<td>RAR</td>';}
+                    }},
+                    { data: 'annotation', width: '10%' },
+                    { data: 'theatre', width: '5%' },
+                    { data: 'datetime', width: '10%', searchable: false,
+                     render: function (data, type, row, meta) {
+                        return moment.utc(data).local().format('YYYY-MM-DDTHH:mm:ss');
+                    }},
+                    { data: 'status', width: '9%', searchable: false,
+                     render: function (data, type, row) {
+                        if (row.status == "-1") {
+                            return '<td>PENDING</td>';}
+                        if (row.status == "0") {
+                            return '<td>QUEUED</td>';}
+                        if (row.status == "1") {
+                            return '<td>IN_PROGRESS</td>';}
+                        if (row.status == "2") {
+                            return '<td>IN_PROGRESS_POST</td>';}
+                        if (row.status == "3") {
+                            return '<td>PAUSED</td>';}
+                        if (row.status == "4") {
+                            return '<td>FINISHED</td>';}
+                        if (row.status == "5") {
+                            return '<td>CANCELED</td>';}
+                        if (row.status == "6") {
+                            return '<td>EXCEPTION</td>';}
+                        else{
+                            return '<td>ERROR</td>';}
+                    }
+                    },
+                    { data: 'messages.0', width: '28%', searchable: false, render: $.fn.dataTable.render.ellipsis(150, true) },
+                    { data: 'null', defaultContent: '<i class="fa-solid fa-trash-can"></i>', width: '4%', searchable: false },
+                ]
+
             });
 
 
@@ -126,17 +170,13 @@
         body {
             background: #1C2135;
         }
-        .truncate {
-  max-width:50px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+        /****************************************************/
 
+        /* Delete button */
         a.nav-link.dropdown-toggle {
             position: absolute;
             top: 20px;
-            left: 12px;
+            left: 13px;
             width: 44px;
             height: 40px;
             color: #F7F9FF;
@@ -148,24 +188,95 @@
             font-size: 14px;
             z-index: 100;
         }
-        a.nav-link.dropdown-toggle:after {
-            display: none;
+
+        /* Export csv button */
+        button.dt-button.buttons-csv.buttons-html5 {
+            position: relative;
+            left: 53px;
+            width: 44px;
+            height: 40px;
+            color: #F7F9FF;
+            background: #007BFF;
+            border-radius: 5px;
+            border: none;
         }
 
+        /** Search Field **/
+        div.dataTables_wrapper div.dataTables_filter input {
+            position: relative;
+            width: 330px;
+            height: 40px;
+            border: none;
+            top: 20px;
+            right: 75px;
+            background-color: #282E43 !important;
+            color: white;
+        }
+
+        input[type="search"] {
+            background: #282E43;
+            font-style: italic;
+        }
+
+        /* Filter checkbox button */
+        button.dt-button.buttons-collection.buttons-colvis {
+            position: relative;
+            float: right;
+            width: 44px;
+            height: 40px;
+            color: #F7F9FF;
+            background: #007BFF;
+            border-radius: 5px;
+            border: none;
+            z-index: 100;
+        }
+
+        /* Checkbox menu */
+         div.dt-button-collection {
+            position: absolute;
+            top: 40px;
+            left: 1300px !important;
+            width: 200px;
+            margin-top: 3px;
+            margin-bottom: 3px;
+            padding: 4px 4px 2px 4px;
+            border: 1px solid #ccc;
+            border: 1px solid rgba(0, 0, 0, 0.4);
+            background-color: #262E43;
+            overflow: hidden;
+            z-index: 2002;
+            border-radius: 5px;
+            box-shadow: 3px 4px 10px 1pxrgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
+        }
+
+        /* Button */
+        div.dt-buttons {
+            position: absolute;
+            margin-top: 20px;
+            margin-left: 10px;
+            width: 98%;
+        }
+
+        /* Delete button & Filter button arrow */
+        a.nav-link.dropdown-toggle:after, span.dt-down-arrow {
+            display: none;
+        }
+        /* Delete icon menu background */
         .dropdown-menu {
             background: #262E43;
         }
-
+        /* Delete icon menu item */
         a.dropdown-item {
             color: white;
             z-index: 2;
         }
-
         a.dropdown-item:hover {
             color: white;
             background: none;
         }
 
+        /* Checkbox */
         button.dt-button.buttons-columnVisibility:before,
         button.dt-button.buttons-columnVisibility.active span:before {
             display:block;
@@ -221,102 +332,24 @@
             margin-left:20px;
         }
 
+       /****************************************************/
 
-
+        /* DataTable body */
         table#example.table.table-striped.dataTable.no-footer {
             position: relative;
             padding-top: 25px;
-            margin-left: 10px;
+            margin-left: 12px;
             max-width: 98% !important;
             font-size: 12px;
         }
 
-        div.dt-buttons {
-            position: absolute;
-            margin-top: 20px;
-            margin-left: 10px;
-            width: 98%;
-        }
-
-        button.dt-button.buttons-collection{
-            position: relative;
-            width: 44px;
-            height: 40px;
-            color: #F7F9FF;
-            background: #007BFF;
-            border-radius: 5px;
-            border: none;
-        }
-
-        div.dt-button-collection.dtb-b3 {
-            position: absolute;
-            top: 35px !important;
-            left: 0 !important;
-            width: 200px;
-            margin-top: 3px;
-            margin-bottom: 3px;
-            padding: 4px 4px 2px 4px;
-            border: 1px solid #ccc;
-            border: 1px solid rgba(0, 0, 0, 0.4);
-            background-color: #262E43;
-            overflow: hidden;
-            z-index: 2002;
-            border-radius: 5px;
-            box-shadow: 3px 4px 10px 1px rgb(0 0 0 / 30%);
-            box-sizing: border-box;
-        }
-
-        div.dt-button-collection {
-            position: absolute;
-            top: 40px;
-            left: 1300px !important;
-            width: 200px;
-            margin-top: 3px;
-            margin-bottom: 3px;
-            padding: 4px 4px 2px 4px;
-            border: 1px solid #ccc;
-            border: 1px solid rgba(0, 0, 0, 0.4);
-            background-color: #262E43;
-            overflow: hidden;
-            z-index: 2002;
-            border-radius: 5px;
-            box-shadow: 3px 4px 10px 1pxrgba(0, 0, 0, 0.3);
-            box-sizing: border-box;
-        }
-
-        button.dt-button.buttons-collection.buttons-colvis {
-            position: relative;
-            float: right;
-            width: 44px;
-            height: 40px;
-            color: #F7F9FF;
-            background: #007BFF;
-            border-radius: 5px;
-            border: none;
-            z-index: 100;
-        }
-
-        span.dt-down-arrow {
-            display: none;
-        }
-
-        button.dt-button.buttons-csv.buttons-html5 {
-            position: relative;
-            left: 50px;
-            width: 44px;
-            height: 40px;
-            color: #F7F9FF;
-            background: #007BFF;
-            border-radius: 5px;
-            border: none;
-        }
-
-        .table-striped>tbody>tr:nth-child(odd)>td,
-        .table-striped>tbody>tr:nth-child(odd)>th {
-           background-color: #262E43;
-           color: white;
-           border: none;
-         }
+        /* Table body background color */
+       .table-striped>tbody>tr:nth-child(odd)>td,
+       .table-striped>tbody>tr:nth-child(odd)>th {
+          background-color: #262E43;
+          color: white;
+          border: none;
+       }
 
         .table-striped>tbody>tr:nth-child(even)>td, .table-striped>thead>tr>th,
         .table-striped>tbody>tr:nth-child(even)>th {
@@ -350,27 +383,6 @@
             padding-right: 20px;
         }
 
-        /****************************************************/
-
-        /** Search Field **/
-        div.dataTables_wrapper div.dataTables_filter input {
-            position: relative;
-            width: 330px;
-            height: 40px;
-            border: none;
-            top: 20px;
-            margin-right: 80px;
-            background-color: #282E43 !important;
-            color: white;
-        }
-
-        input[type="search"] {
-            background: #282E43;
-            font-style: italic;
-        }
-
-        /****************************************************/
-
         /** Column Previous **/
         .dataTables_wrapper .dataTables_paginate .paginate_button {
             padding: 0;
@@ -395,28 +407,17 @@
         .dataTables_info, .dataTables_length{
             color: white !important;
             padding-left: 15px;
+            width: 300px;
         }
+
+
+
 
         /** Show entries Select **/
         select.form-select.form-select-sm{
-            width: 100px !important;
+            width: auto !important;
             background: #22273C !important;
             color: white;
-        }
-
-
-        button#CheckboxdropdownMenuButton.btn.btn-secondary.dropdown-toggle {
-            position: relative;
-            float: right;
-            right: 20px;
-            top: 40px;
-            z-index: 99;
-            background: #007BFF;
-            border: none;
-        }
-
-        button#CheckboxdropdownMenuButton.btn.btn-secondary.dropdown-toggle::after {
-            content: none;
         }
 
         div.dropdown-menu.show {
@@ -467,69 +468,6 @@
 
 <body>
 
-<!--    <div class="dropdown">-->
-<!--        <button class="btn btn-secondary dropdown-toggle" type="button" id="CheckboxdropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
-<!--        <i class="fa-solid fa-sliders"></i>-->
-<!--        </button>-->
-<!--        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">-->
-<!--            <div class="title">Column:</div>-->
-<!--            <div class="checkbox_column">-->
-<!--                <a class="dropdown-item" href="#">-->
-<!--                    <div class="custom-control custom-checkbox">-->
-<!--                        <input type="checkbox" data-column="0" class="toggle-vis custom-control-input" id="checkbox0" checked>-->
-<!--                        <label class="custom-control-label" for="checkbox0">Status Indicator</label>-->
-<!--                    </div>-->
-<!--                </a>-->
-<!--                <a class="dropdown-item" href="#">-->
-<!--                    <div class="custom-control custom-checkbox">-->
-<!--                        <input type="checkbox" data-column="1" class="toggle-vis custom-control-input" id="checkbox1" checked>-->
-<!--                        <label class="custom-control-label" for="checkbox1">Kind</label>-->
-<!--                    </div>-->
-<!--                </a>-->
-<!--                <a class="dropdown-item" href="#">-->
-<!--                    <div class="custom-control custom-checkbox">-->
-<!--                        <input type="checkbox" data-column="2" class="toggle-vis custom-control-input" id="checkbox2" checked disabled>-->
-<!--                        <label class="custom-control-label" for="checkbox2">Name</label>-->
-<!--                    </div>-->
-<!--                </a>-->
-<!--                <a class="dropdown-item" href="#">-->
-<!--                    <div class="custom-control custom-checkbox">-->
-<!--                        <input type="checkbox" data-column="3" class="toggle-vis custom-control-input" id="checkbox3" checked>-->
-<!--                        <label class="custom-control-label" for="checkbox3">Theatre</label>-->
-<!--                    </div>-->
-<!--                </a>-->
-<!--                <a class="dropdown-item" href="#">-->
-<!--                    <div class="custom-control custom-checkbox">-->
-<!--                        <input type="checkbox" data-column="4" class="toggle-vis custom-control-input" id="checkbox4" checked>-->
-<!--                        <label class="custom-control-label" for="checkbox4">Issue Date</label>-->
-<!--                    </div>-->
-<!--                </a>-->
-<!--                <a class="dropdown-item" href="#">-->
-<!--                    <div class="custom-control custom-checkbox">-->
-<!--                        <input type="checkbox" data-column="5" class="toggle-vis custom-control-input" id="checkbox5" checked>-->
-<!--                        <label class="custom-control-label" for="checkbox5">Status</label>-->
-<!--                    </div>-->
-<!--                </a>-->
-<!--                <a class="dropdown-item" href="#">-->
-<!--                    <div class="custom-control custom-checkbox">-->
-<!--                        <input type="checkbox" data-column="6" class="toggle-vis custom-control-input" id="checkbox6" checked>-->
-<!--                        <label class="custom-control-label" for="checkbox6">Exception Message</label>-->
-<!--                    </div>-->
-<!--                </a>-->
-<!--                <a class="dropdown-item" href="#">-->
-<!--                    <div class="custom-control custom-checkbox">-->
-<!--                        <input type="checkbox" data-column="7" class="toggle-vis custom-control-input" id="checkbox7" checked>-->
-<!--                        <label class="custom-control-label" for="checkbox7">Action</label>-->
-<!--                    </div>-->
-<!--                </a>-->
-<!--            </div>-->
-<!--            <div><button class="reset">Reset Defaults</button></div>-->
-<!--        </div>-->
-<!--    </div>-->
-
-
-
-
     <table id="example" class="table table-striped">
         <thead>
             <tr>
@@ -543,85 +481,6 @@
                 <th>Action</th>
             </tr>
         </thead>
-
-        <tbody data-bind="foreach: data">
-        <!--ko foreach: objects-->
-            <tr>
-            <!--ko if: progress == 0-->
-                <td class="status_icon"><i class="fa-solid fa-circle-xmark"></i></td>
-            <!--/ko-->
-            <!--ko ifnot: progress == 0-->
-                <td class="status_icon"><i class="fa-solid fa-circle-check"></i></td>
-            <!--/ko-->
-            <!--ko if: type == 1026-->
-                <td>KDM</td>
-            <!--/ko-->
-            <!--ko if: type == 1027-->
-                <td>DCP</td>
-            <!--/ko-->
-            <!--ko if: type == 1028-->
-                <td>SPL</td>
-            <!--/ko-->
-            <!--ko if: type == 1029-->
-                <td>PACK</td>
-            <!--/ko-->
-            <!--ko if: type == 1030-->
-                <td>RAR</td>
-            <!--/ko-->
-                <td data-bind="text: annotation"></td>
-                <td data-bind="text: theatre"></td>
-                <td data-bind="text: datetime"></td>
-            <!--ko if: status == -1-->
-                <td>PENDING</td>
-            <!--/ko-->
-            <!--ko if: status == 0-->
-                <td>QUEUED</td>
-            <!--/ko-->
-            <!--ko if: status == 1-->
-                <td>IN_PROGRESS</td>
-            <!--/ko-->
-            <!--ko if: status == 2-->
-                <td>IN_PROGRESS_POST</td>
-            <!--/ko-->
-            <!--ko if: status == 3-->
-                <td>PAUSED</td>
-            <!--/ko-->
-            <!--ko if: status == 4-->
-                <td>FINISHED</td>
-            <!--/ko-->
-            <!--ko if: status == 5-->
-                <td>CANCELED</td>
-            <!--/ko-->
-            <!--ko if: status == 6-->
-                <td>EXCEPTION</td>
-            <!--/ko-->
-            <!--ko ifnot: status == -1 || status == 0 || status == 1
-            || status == 2 || status == 3 || status == 4 || status == 5 || status == 6-->
-                <td>ERROR</td>
-            <!--/ko-->
-                <td data-bind="text: messages"></td>
-                <td><i class="fa-solid fa-trash-can"/></td>
-            </tr>
-          <!--/ko-->
-        </tbody>
-
-    </table>
-
-<script type="text/javascript">
-    function AppViewModel() {
-        var self = this;
-
-        self.data = ko.observable(null);
-         $.getJSON("test.json", function(retrievedData) {
-                self.data(retrievedData);
-                console.log(self.data());
-         });
-
-
-    }
-
-    ko.applyBindings(new AppViewModel());
-</script>
 
 </body>
 </html>
