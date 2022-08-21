@@ -30,19 +30,22 @@
         $(document).ready(function () {
             var table = $('#example').DataTable({
                 stateSave: true,
-                info: false,
                 stateLoadParams: function( settings, data ) {
                     if (data.order) delete data.order;
                   },
-                select: true,
                 autoWidth: false,
-                order: [],
                 ajax: {
                     url: 'data.json',
                     dataSrc: 'objects'
                 },
+                dom: '<"toolbar">Bfrtlip',
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search..."
+                },
                 buttons: [
                 {
+
                     extend: 'colvis',
                     text:   '<i class="fa-solid fa-sliders"></i>',
                     postfixButtons: [
@@ -72,12 +75,6 @@
                     }
                 }
                 ],
-                language: {
-                    search: "_INPUT_",
-                    searchPlaceholder: "Search..."
-                },
-
-                dom: '<"toolbar">Bfrtlip',
                 columns: [
                     { data: 'progress', width: '6%', searchable: false, className: "status_icon",
                      render: function (data, type, row) {
@@ -101,7 +98,7 @@
                         if (row.type == "1030") {
                             return '<td>RAR</td>';}
                     }},
-                    { data: 'annotation', width: '10%' },
+                    { data: 'annotation', width: '10%', className: 'noVis' },
                     { data: 'theatre', width: '5%' },
                     { data: 'datetime', width: '10%', searchable: false,
                      render: function (data, type, row, meta) {
@@ -146,34 +143,15 @@
 							<li><a class="dropdown-item" href="#">Clear Pending Task</a></li>\
 							</ul>');
 
-            $('input.toggle-vis').on('click', function (e) {
-                e.stopPropagation;
-                // Get the column API object
-                var column = table.column($(this).attr('data-column'));
 
-                // Toggle the visibility
-                column.visible(!column.visible());
-
-            });
-            $("button.reset").click(function(){
-                $("input.toggle-vis").prop("checked", true);
-                table.column( 0 ).visible( true );
-                table.column( 1 ).visible( true );
-                table.column( 2 ).visible( true );
-                table.column( 3 ).visible( true );
-                table.column( 4 ).visible( true );
-                table.column( 5 ).visible( true );
-                table.column( 6 ).visible( true );
-                table.column( 7 ).visible( true );
-            });
 
         });
     </script>
-
     <style>
         body {
             background: #1C2135;
         }
+
         /****************************************************/
 
         /* Delete button */
@@ -296,13 +274,21 @@
             color: white;
         }
 
+        div.dt-button-collection button.dt-button.active:active {
+            background: none !important;
+        }
+
         div.dt-button-collection button.dt-button.active:not(.disabled){
             background: #262E43;
             color: white;
         }
 
-        div.dt-button-collection button.dt-button.active:not(.disabled):hover {
-            background: none;
+        div.dt-button-collection button.dt-button:nth-child(3) {
+            pointer-events: none;
+        }
+        div.dt-button-collection button.dt-button.active:nth-child(3) {
+            color: #B9B9B9;
+            background: #474B59;
         }
 
         div.dt-button-collection button.dt-button:last-child {
@@ -336,9 +322,7 @@
             margin-left:20px;
         }
 
-        button.dt-button.buttons-columnVisibility.active:active {
-            background-color: none;
-        }
+
 
        /****************************************************/
 
@@ -418,53 +402,12 @@
             width: 300px;
         }
 
-
-
-
         /** Show entries Select **/
         select.form-select.form-select-sm{
             width: auto !important;
             background: #22273C !important;
             color: white;
         }
-
-        div.dropdown-menu.show {
-            transform: translate3d(1244px, 76px, 0px) !important;
-            width: 260px;
-            background: #4C5569;
-            background-repeat: no-repeat;
-            font-size: 13px;
-
-        }
-
-        div.title {
-            margin: 5px 0 0 20px;
-            color: white;
-        }
-
-        div.checkbox_column{
-            position: relative;
-            width: 220px;
-            display: block;
-            margin: 15px 0 0 20px;
-            z-index: 2;
-
-        }
-
-
-        button.reset {
-            position: relative;
-            right: 6px;
-            text-decoration: none;
-            color: lightblue;
-            font-size: 13px;
-            margin: 5px 0 0 157px;
-            border: none;
-            outline: none;
-            background: none;
-        }
-
-
 
         .page-link:hover {
             background: none;
